@@ -1,0 +1,20 @@
+{
+  "name": "my-daily",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reconstitue ce qui a ete fait la veille a partir des sessions Claude Code et de l'activite GitHub, puis le resume pour le daily.",
+  "bin": {
+    "my-daily": "./bin/my-daily"
+  },
+  "scripts": {
+    "daily": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "yarn@1.22.22"
+}

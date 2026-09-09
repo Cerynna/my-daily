@@ -1,0 +1,11 @@
+{
+  "githubLogins": ["mon-login-github", "mon-autre-login"],
+  "claudeProjectsDirectory": "~/.claude/projects",
+  "model": null,
+  "maxPromptLength": 400,
+  "maxPromptsPerSession": 15,
+  "maxFilesPerSession": 25,
+  "githubResultLimit": 60,
+  "githubThrottleMs": 1500,
+  "excludedProjectPaths": []
+}

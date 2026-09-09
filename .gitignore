@@ -1,0 +1,7 @@
+node_modules/
+config.json
+out/
+*.log
+tray/dist/
+tray/**/bin/
+tray/**/obj/
