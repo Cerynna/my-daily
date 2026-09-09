@@ -103,6 +103,20 @@ prevu. Les reglages vivent dans
 Si le PC dort a 9h30, rien n'est perdu : au reveil, l'app rattrape le cycle tant que
 l'heure de fermeture n'est pas passee.
 
+## Depot
+
+Le depot vit sous le compte GitHub **Cerynna**, alors que le compte `gh` actif au
+quotidien est le compte pro. Avant de pousser :
+
+```sh
+gh auth switch --user Cerynna
+```
+
+Sans ca, `git push` repond « Repository not found » : le credential helper de `gh`
+utilise le compte actif, qui n'a pas acces a ce depot prive. L'identite des commits
+est deja fixee en local sur ce depot (`git config user.email`), il n'y a rien a
+changer de ce cote.
+
 ## Structure
 
 ```
