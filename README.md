@@ -30,6 +30,26 @@ yarn daily --json             # l'activité collectée, en JSON
 yarn daily --out ~/daily.md   # dans un fichier
 ```
 
+### Weekly des archis
+
+```sh
+yarn weekly                   # 7 derniers jours, aujourd'hui compris
+yarn weekly --days 14         # depuis le weekly d'il y a deux semaines
+yarn weekly --prompt          # le prompt envoyé à Claude
+```
+
+Même collecte que le daily, mais un autre résumé : une section par projet (dépôt), et
+seulement les sujets qui intéressent les architectes — décisions et ADR, infra et cloud,
+intégrations entre services, CI/CD et outillage transverse, sécurité, observabilité,
+dette technique, incidents de prod. Les correctifs fonctionnels, relectures de routine,
+Dependabot et mises en prod courantes sont écartés. Une section **À discuter** reprend
+les questions qui appellent un avis des archis.
+
+Alias : `alias weekly='~/Labo/my-daily/bin/my-daily --weekly'`.
+
+> Sur une semaine, les recherches `gh` peuvent atteindre `githubResultLimit` (60 par
+> défaut), surtout les relectures. Monte-le dans `config.json` si des PR manquent.
+
 `--no-github` / `--no-sessions` coupent une source, `--model` change le modèle du résumé,
 `--quiet` supprime l'indicateur de progression.
 
@@ -121,7 +141,7 @@ changer de ce cote.
 
 ```
 src/                       CLI TypeScript
-  domain/                  fenêtre temporelle, modèle d'activité, construction du brief
+  domain/                  fenêtre temporelle, modèle d'activité, prompts daily et weekly archi
   application/             ports + use case generate-daily-brief
   infrastructure/          lecture des .jsonl, gh CLI, claude CLI, progression, config
 tray/src/MyDailyTray/      app systray .NET 8 (WinForms)
