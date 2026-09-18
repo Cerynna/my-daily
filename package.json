@@ -9,6 +9,7 @@
   },
   "scripts": {
     "daily": "tsx src/cli.ts",
+    "weekly": "tsx src/cli.ts --weekly",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

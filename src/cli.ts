@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import { createGenerateDailyBrief } from './application/generate-daily-brief.js'
 import { createDailyWindow } from './domain/daily-window.js'
-import { buildSummaryPrompt } from './domain/daily-brief.js'
+import { summaryPromptFor, type BriefKind } from './domain/brief-kind.js'
 import { createClaudeCliSummarizer } from './infrastructure/claude-cli-summarizer.js'
 import { createClaudeSessionStore } from './infrastructure/claude-session-store.js'
 import { createGitHubCliActivitySource } from './infrastructure/github-cli-activity-source.js'
@@ -19,7 +19,10 @@ const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const USAGE = `my-daily — reconstitue ta veille pour le daily
 
 Usage : yarn daily [options]
+        yarn weekly [options]
 
+  --weekly             Weekly des archis : un résumé par projet, gros sujets
+                       seulement, sur les 7 derniers jours aujourd'hui compris
   --date <YYYY-MM-DD>  Un jour précis
   --days <n>           Les n derniers jours
   --include-today      Inclut aussi aujourd'hui
@@ -37,6 +40,7 @@ Usage : yarn daily [options]
 Sans option : le dernier jour ouvré (vendredi si on est lundi).`
 
 type Options = {
+  readonly weekly: boolean
   readonly date: string | undefined
   readonly days: number | undefined
   readonly includeToday: boolean
@@ -59,6 +63,7 @@ const requireValue = (flag: string, value: string | undefined): string => {
 
 const parseOptions = (argv: readonly string[]): Options => {
   const options = {
+    weekly: false,
     date: undefined as string | undefined,
     days: undefined as number | undefined,
     includeToday: false,
@@ -77,6 +82,9 @@ const parseOptions = (argv: readonly string[]): Options => {
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index]
     switch (flag) {
+      case '--weekly':
+        options.weekly = true
+        break
       case '--date':
         options.date = requireValue(flag, argv[++index])
         break
@@ -142,11 +150,13 @@ const main = async (): Promise<void> => {
   }
 
   const config = await loadConfig(PROJECT_ROOT)
+  const kind: BriefKind = options.weekly ? 'architecture-weekly' : 'daily'
+  const days = options.days ?? (options.weekly && options.date === undefined ? 7 : undefined)
   const window = createDailyWindow({
     reference: new Date(),
-    includeToday: options.includeToday,
+    includeToday: options.includeToday || options.weekly,
     ...(options.date === undefined ? {} : { date: options.date }),
-    ...(options.days === undefined ? {} : { days: options.days }),
+    ...(days === undefined ? {} : { days }),
   })
 
   const progress = options.quiet
@@ -184,12 +194,12 @@ const main = async (): Promise<void> => {
       timeoutMs: 300_000,
       progress,
     }),
-  })({ window, summarize: !options.raw && !options.json && !options.promptOnly })
+  })({ window, kind, summarize: !options.raw && !options.json && !options.promptOnly })
 
   const output = options.json
     ? JSON.stringify(brief.activity, null, 2)
     : options.promptOnly
-      ? buildSummaryPrompt(brief.activity)
+      ? summaryPromptFor(kind, brief.activity)
       : (brief.summary ?? brief.raw)
 
   progress.stop()

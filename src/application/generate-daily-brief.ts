@@ -1,5 +1,6 @@
-import { buildSummaryPrompt, renderActivity } from '../domain/daily-brief.js'
+import { renderActivity } from '../domain/daily-brief.js'
 import { isEmpty, type DailyActivity } from '../domain/activity.js'
+import { summaryPromptFor, type BriefKind } from '../domain/brief-kind.js'
 import type { DailyWindow } from '../domain/daily-window.js'
 import type { ClaudeSessionSource, DailySummarizer, GitHubActivitySource } from './ports.js'
 
@@ -11,6 +12,7 @@ export type DailyBrief = {
 
 export type GenerateDailyBriefRequest = {
   readonly window: DailyWindow
+  readonly kind: BriefKind
   readonly summarize: boolean
 }
 
@@ -21,7 +23,7 @@ type Dependencies = {
 }
 
 export const createGenerateDailyBrief = ({ claudeSessions, github, summarizer }: Dependencies) => {
-  return async ({ window, summarize }: GenerateDailyBriefRequest): Promise<DailyBrief> => {
+  return async ({ window, kind, summarize }: GenerateDailyBriefRequest): Promise<DailyBrief> => {
     const [sessions, accounts] = await Promise.all([
       claudeSessions === null ? Promise.resolve([]) : claudeSessions.collect(window),
       github === null ? Promise.resolve([]) : github.collect(window),
@@ -32,6 +34,6 @@ export const createGenerateDailyBrief = ({ claudeSessions, github, summarizer }:
 
     if (!summarize || isEmpty(activity)) return { activity, raw, summary: null }
 
-    return { activity, raw, summary: await summarizer.summarize(buildSummaryPrompt(activity)) }
+    return { activity, raw, summary: await summarizer.summarize(summaryPromptFor(kind, activity)) }
   }
 }
